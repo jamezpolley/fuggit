@@ -2,7 +2,6 @@
 # encoding: utf-8
 
 import errno
-import logging
 import os
 import os.path
 
@@ -37,8 +36,8 @@ def add(local_filename):
     local("scp %s:%s %s" % (hostname, remote_path, local_filename))
     with warn_only():
         local("git add %s" % local_filename)
-        local("git commit -m 'Added %s from remote' %s" % (local_filename,
-                                                           local_filename))
+        local("git commit -m 'Added %s from %s' %s" % (
+              remote_path, hostname, local_filename))
 
 
 @begin.subcommand
@@ -50,7 +49,8 @@ def pull(local_filename):
     local("git stash")
     local("scp %s:%s %s" % (hostname, remote_path, local_filename))
     with warn_only():
-        local("git commit -m 'Pull from remote' %s" % local_filename)
+        local("git commit -m 'Pull %s from %s' %s" % (
+              remote_path, hostname, local_filename))
         local("git stash pop")
 
 
@@ -62,9 +62,31 @@ def vimdiff(local_filename):
 
 
 @begin.start
-@begin.logging
 def run():
-    """Fuggit: for when you want to put that file in git, but you can't be f
+    """Fuggit: for when you want to put that file in git, but you can't be...
 
-    You know the feeling. You're looking for a"""
+    You know the feeling. You're making a quick dirty hack to a file on a
+    remote machine that. The file isn't under version control. You want to
+    have the convenience of editing the file locally, *and* you want the
+    ability to roll back your changes. Putting the remote file under version
+    control is just too hard, so what do you say? fuggit.
+    
+    Specifcally:
+        
+    fuggit add remote.hostname/etc/file.name
+    
+    this will grab /etc/file.name from the machine remote.hostname; save it
+    as remote.hostname/etc/file.name under $PWD. The file will be added and
+    committed to git.
+    
+    fuggit pull remote.hostname/etc/file.name
+    
+    can be used to refresh your local copy of the file. Any local changes
+    will be preserved; any remote changes will result in a new commit.
+    
+    fuggit vimdiff remote.hostname/etc/file.name
+    
+    will open a vimdiff window showing your local copy of the file and the
+    remote copy. Thanks to the magic of vim, any changes you make to the
+    remote file will be pushed to the servce once you close the file."""
     pass
