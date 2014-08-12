@@ -33,9 +33,7 @@ def add(local_filename):
 
     if os.path.exists(local_filename):
         raise OSError(errno.EEXIST, "%s already exists" % local_filename)
-    logging.debug("local: %s", local_filename)
     hostname, remote_path = get_top_dir(local_filename)
-    logging.debug("hn: %s remote: %s", hostname, remote_path)
     local("scp %s:%s %s" % (hostname, remote_path, local_filename))
     with warn_only():
         local("git add %s" % local_filename)
@@ -46,9 +44,9 @@ def add(local_filename):
 @begin.subcommand
 def pull(local_filename):
     """Pulls the remote copy of LOCAL_FILENAME"""
-    logging.debug("local: %s", local_filename)
+    if not os.path.exists(local_filename):
+        raise OSError(errno.ENOENT, "%s does not exist" % local_filename)
     hostname, remote_path = get_top_dir(local_filename)
-    logging.debug("hn: %s remote: %s", hostname, remote_path)
     local("git stash")
     local("scp %s:%s %s" % (hostname, remote_path, local_filename))
     with warn_only():
