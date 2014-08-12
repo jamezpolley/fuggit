@@ -32,10 +32,12 @@ def add(local_filename):
 
     if os.path.exists(local_filename):
         raise OSError(errno.EEXIST, "%s already exists" % local_filename)
+    if not os.path.exists(os.path.dirname(local_filename)):
+        os.makedirs(os.path.dirname(local_filename))
     hostname, remote_path = get_top_dir(local_filename)
     local("scp %s:%s %s" % (hostname, remote_path, local_filename))
     with warn_only():
-        local("git add %s" % local_filename)
+        local("git add -f %s" % local_filename)
         local("git commit -m 'Added %s from %s' %s" % (
               remote_path, hostname, local_filename))
 
